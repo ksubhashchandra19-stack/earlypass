@@ -128,10 +128,17 @@ $$;
 
 create or replace function public.is_school_member(target_school uuid)
 returns boolean language sql stable security definer set search_path = public
-as $$
+as $
   select exists (select 1 from public.profiles p
     where p.user_id = auth.uid() and p.school_id = target_school);
-$$;
+$;
+
+create or replace function public.is_school_admin(target_school uuid)
+returns boolean language sql stable security definer set search_path = public
+as $
+  select exists (select 1 from public.profiles p
+    where p.user_id = auth.uid() and p.school_id = target_school and p.role = 'ADMIN');
+$;
 
 create or replace function public.my_student_id()
 returns uuid language sql stable security definer set search_path = public
@@ -162,16 +169,14 @@ create policy "assigned teachers manage classrooms" on public.classrooms for all
 
 create policy "users read own profile" on public.profiles for select using (user_id=auth.uid());
 create policy "admins read school profiles" on public.profiles for select using (
-  exists (select 1 from public.profiles me where me.user_id=auth.uid() and me.school_id=school_id and me.role='ADMIN')
+  public.is_school_admin(school_id)
 );
 
 create policy "teachers read assignments" on public.classroom_teachers for select using (user_id=auth.uid() or public.is_class_teacher(classroom_id));
 create policy "admins manage assignments" on public.classroom_teachers for all using (
-  exists (select 1 from public.profiles p join public.classrooms c on c.school_id=p.school_id
-    where p.user_id=auth.uid() and p.role='ADMIN' and c.id=classroom_id)
+  exists (select 1 from public.classrooms c where c.id=classroom_id and public.is_school_admin(c.school_id))
 ) with check (
-  exists (select 1 from public.profiles p join public.classrooms c on c.school_id=p.school_id
-    where p.user_id=auth.uid() and p.role='ADMIN' and c.id=classroom_id)
+  exists (select 1 from public.classrooms c where c.id=classroom_id and public.is_school_admin(c.school_id))
 );
 
 create policy "students read self or teacher reads roster" on public.students for select using (
@@ -225,7 +230,7 @@ grant select, insert, update, delete on public.classrooms, public.classroom_teac
   public.students, public.periods, public.class_days, public.attendance,
   public.arrivals, public.earlypass_rewards to authenticated;
 grant select on public.profiles to authenticated;
-grant execute on function public.is_class_teacher(uuid), public.is_school_member(uuid), public.my_student_id() to authenticated;
+grant execute on function public.is_class_teacher(uuid), public.is_school_member(uuid), public.is_school_admin(uuid), public.my_student_id() to authenticated;
 
 -- Provision the first school, classroom, teacher profile, and classroom_teachers
 -- assignment using the SQL Editor / trusted admin tooling. Never let public signup
