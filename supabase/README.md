@@ -1,23 +1,27 @@
-# Supabase setup (EarlyPass backend foundation)
+# EarlyPass account app and Supabase setup
 
-The public GitHub Pages site is still the local-only prototype until its UI is connected to Supabase. This directory prepares the database access model; do not enter real student records in the current demo UI.
+The published root app now uses Supabase Auth and the database for teacher/student views. The local-only walkthrough is preserved at [demo.html](../demo.html). Demo data is not shared with authenticated accounts.
 
-## Configure the database
+## Database setup
 
-1. In your Supabase project, open **SQL Editor → New query**.
-2. Copy and run [schema.sql](./schema.sql).
-3. Create your first teacher account in **Authentication → Users** (invite the account or enable the sign-in method you intend to use).
-4. Using the SQL Editor, create the school, classroom, and teacher profile, then assign that teacher to the classroom in `classroom_teachers`. The teacher profile's `user_id` must match the Auth user's ID. Never expose a service-role key in the website.
-5. Add classes, periods, and students after the teacher/class assignment exists.
+You said you ran [schema.sql](./schema.sql). That creates the tables and Row Level Security policies. It does not create user accounts or assign roles.
 
-The schema keeps role assignment out of public signup and applies Row Level Security to student, period, arrival, attendance, and reward data. Students can read only the student record linked to their profile and its attendance; assigned teachers manage their classes. School administrators provision accounts and assignments through trusted tooling.
+## Add the first teacher and class
 
-## Still required before production use
+1. In Supabase, open **Authentication → Users** and invite or create the teacher using the email they will use to sign in.
+2. Copy the exact email address. In **SQL Editor → New query**, open [first-teacher-setup.sql](./first-teacher-setup.sql), replace `TEACHER_EMAIL`, `SCHOOL_NAME`, and `TEACHER_NAME`, then run it once.
+3. The setup script creates a starter Class 8A schedule. Add real students from the authenticated app after signing in.
+4. Set **Authentication → URL Configuration → Site URL** to `https://ksubhashchandra19-stack.github.io/earlypass/`. Add that URL and the exact `/earlypass/index.html` URL to the allowed redirect URLs for password reset.
+5. Sign in at [EarlyPass](https://ksubhashchandra19-stack.github.io/earlypass/index.html). Use the invited teacher account and its password.
 
-The current frontend has not yet been migrated from browser-local demo state to Supabase Auth and database queries. The shared board PIN also requires a server-side validation/session flow before it can authorize writes. Do not treat the presence of these tables as completed authentication or as production approval for student data.
+For additional classes, student accounts, or administrator accounts, a trusted school administrator must create their Auth user, matching profile row, and class assignment. Public self-signup is not used to choose roles. Students can read only the student record linked to their profile; they cannot mark or correct attendance.
 
-To finish the live application, the frontend needs Supabase sign-in, profile/role loading, teacher CRUD and attendance persistence, student self-only views, plus a protected board session. Verify each RLS policy with separate student, teacher, and admin test accounts before using real records.
+## Account model and limitations
 
-## Browser credentials
+The browser uses the project's publishable key. The key is intentionally public; Row Level Security is the protection boundary. Never put a service-role or secret key in a static website.
 
-A Supabase project URL and publishable (or legacy anon) key may be used by a browser only after policies are in place and tested. Never put a service-role/secret key in static files. Google Classroom sync remains a separately configured server-side OAuth integration; Demo Sync is not a real Google connection.
+The shared board can be opened from an authorized school account. A teacher uses the shared display to record a student's check-in for a period. Student views are read-only. The current board session uses teacher sign-in; classroom PIN-only guest access is not enabled yet.
+
+Google Classroom remains a clearly labelled mock preview in the demo. Real OAuth/API sync requires a server-side token exchange and configured Google Cloud OAuth credentials. This static app does not claim a real Google connection.
+
+The prototype does not include a dedicated backend service for rate-limited PIN sessions or Google OAuth. Do not use real student data until the school validates the account provisioning, access rules, privacy requirements, and actual deployed flow with separate student and teacher accounts.
