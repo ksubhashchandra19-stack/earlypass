@@ -8,6 +8,14 @@ drop index if exists public.periods_classroom_id_position_key;
 create unique index if not exists periods_classroom_weekday_position_key
   on public.periods(classroom_id, weekday, position);
 
+-- Copy the existing shared schedule onto each weekday so edits stay day-specific.
+insert into public.periods(classroom_id, position, weekday, name, subject, teacher_name, room, starts_at, ends_at)
+select p.classroom_id, p.position, days.weekday, p.name, p.subject, p.teacher_name, p.room, p.starts_at, p.ends_at
+from public.periods p
+cross join generate_series(1,7) as days(weekday)
+where p.weekday=0
+on conflict (classroom_id, weekday, position) do nothing;
+
 create table if not exists public.weekly_settings (
   classroom_id uuid not null references public.classrooms(id) on delete cascade,
   weekday smallint not null check (weekday between 1 and 7),
