@@ -16,6 +16,10 @@ You said you ran [schema.sql](./schema.sql). That creates the tables and Row Lev
 
 For additional classes, student accounts, or administrator accounts, a trusted school administrator must create their Auth user, matching profile row, and class assignment. Public self-signup is not used to choose roles. Students can read only the student record linked to their profile; they cannot mark or correct attendance.
 
+## Weekly timetable and daily goals
+
+The app includes a teacher **Weekly timetable** page for weekday-specific class start times, early-arrival windows, EarlyPass targets, and period schedules. To enable persistent weekly settings on an existing Supabase project, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) once in **Supabase → SQL Editor** after the main schema. The migration keeps existing periods as a shared fallback schedule. Then reload EarlyPass and open **Weekly timetable**.
+
 ## Account model and limitations
 
 The browser uses the project's publishable key. The key is intentionally public; Row Level Security is the protection boundary. Never put a service-role or secret key in a static website.
