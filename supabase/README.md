@@ -20,6 +20,18 @@ For additional classes, student accounts, or administrator accounts, a trusted s
 
 The app includes a teacher **Weekly timetable** page for weekday-specific class start times, early-arrival windows, EarlyPass targets, and period schedules. To enable persistent weekly settings on an existing Supabase project, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) once in **Supabase → SQL Editor** after the main schema. The migration copies your existing periods into each weekday so you can adjust days independently while keeping historical attendance intact. Then reload EarlyPass and open **Weekly timetable**.
 
+## Real Google Classroom connection
+
+The teacher Settings page supports a real Google OAuth connection and Classroom API course/roster import. It does not show a connected state unless Google grants an access token for the current session. To configure it:
+
+1. In Google Cloud Console, create or select a project and enable the **Google Classroom API**.
+2. Configure the OAuth consent screen and add the teacher as a test user while the consent screen is in testing.
+3. Create an OAuth **Web application** client. Add `https://ksubhashchandra19-stack.github.io` as an authorized JavaScript origin.
+4. Run the latest [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) in Supabase if it has not been run again since the Google roster field was added.
+5. In EarlyPass **Settings → Google Classroom**, save the Web Client ID, connect, choose a course, preview the roster, and confirm sync.
+
+Only the OAuth client ID is stored in the browser; Google access tokens remain in memory for that session. Roster sync matches existing students by Google student ID or email and assigns EarlyPass IDs and roll numbers to new records. Demo data does not claim to be a live Google connection.
+
 ## Account model and limitations
 
 The browser uses the project's publishable key. The key is intentionally public; Row Level Security is the protection boundary. Never put a service-role or secret key in a static website.
