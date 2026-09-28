@@ -25,6 +25,8 @@ create table if not exists public.weekly_settings (
   updated_at timestamptz not null default now(),
   primary key (classroom_id, weekday)
 );
+alter table public.students add column if not exists google_student_id text;
+create unique index if not exists students_school_google_id_key on public.students(school_id, google_student_id) where google_student_id is not null;
 alter table public.weekly_settings enable row level security;
 drop policy if exists "members read weekly settings" on public.weekly_settings;
 create policy "members read weekly settings" on public.weekly_settings for select using (
