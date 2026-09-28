@@ -62,6 +62,7 @@ create table public.periods (
   id uuid primary key default gen_random_uuid(),
   classroom_id uuid not null references public.classrooms(id) on delete cascade,
   position int not null,
+  weekday smallint not null default 0 check (weekday between 0 and 7),
   name text not null,
   subject text not null default '',
   teacher_name text not null default '',
@@ -69,8 +70,18 @@ create table public.periods (
   starts_at time not null,
   ends_at time not null,
   created_at timestamptz not null default now(),
-  unique (classroom_id, position),
+  unique (classroom_id, weekday, position),
   check (ends_at > starts_at)
+);
+
+create table public.weekly_settings (
+  classroom_id uuid not null references public.classrooms(id) on delete cascade,
+  weekday smallint not null check (weekday between 1 and 7),
+  class_start time not null,
+  early_window_minutes int not null default 15 check (early_window_minutes between 1 and 180),
+  earlypass_target int not null check (earlypass_target > 0),
+  updated_at timestamptz not null default now(),
+  primary key (classroom_id, weekday)
 );
 
 create table public.class_days (
@@ -152,6 +163,7 @@ alter table public.profiles enable row level security;
 alter table public.classroom_teachers enable row level security;
 alter table public.students enable row level security;
 alter table public.periods enable row level security;
+alter table public.weekly_settings enable row level security;
 alter table public.class_days enable row level security;
 alter table public.attendance enable row level security;
 alter table public.arrivals enable row level security;
@@ -188,6 +200,11 @@ create policy "members read periods" on public.periods for select using (
   exists (select 1 from public.classrooms c where c.id=classroom_id and public.is_school_member(c.school_id))
 );
 create policy "teachers manage periods" on public.periods for all using (public.is_class_teacher(classroom_id)) with check (public.is_class_teacher(classroom_id));
+
+create policy "members read weekly settings" on public.weekly_settings for select using (
+  exists (select 1 from public.classrooms c where c.id=classroom_id and public.is_school_member(c.school_id))
+);
+create policy "teachers manage weekly settings" on public.weekly_settings for all using (public.is_class_teacher(classroom_id)) with check (public.is_class_teacher(classroom_id));
 
 create policy "members read class days" on public.class_days for select using (
   exists (select 1 from public.classrooms c where c.id=classroom_id and public.is_school_member(c.school_id))
@@ -227,7 +244,7 @@ create policy "teachers manage rewards" on public.earlypass_rewards for all usin
 grant usage on schema public to authenticated;
 grant select, update on public.schools to authenticated;
 grant select, insert, update, delete on public.classrooms, public.classroom_teachers,
-  public.students, public.periods, public.class_days, public.attendance,
+  public.students, public.periods, public.weekly_settings, public.class_days, public.attendance,
   public.arrivals, public.earlypass_rewards to authenticated;
 grant select on public.profiles to authenticated;
 grant execute on function public.is_class_teacher(uuid), public.is_school_member(uuid), public.is_school_admin(uuid), public.my_student_id() to authenticated;
