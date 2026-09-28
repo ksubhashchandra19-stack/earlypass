@@ -49,11 +49,13 @@ create table public.students (
   roll_number text not null,
   student_code text not null,
   email text,
+  google_student_id text,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   unique (school_id, student_code),
   unique (classroom_id, roll_number)
 );
+create unique index students_school_google_id_key on public.students(school_id, google_student_id) where google_student_id is not null;
 
 alter table public.profiles add constraint profiles_student_id_fkey
   foreign key (student_id) references public.students(id) on delete set null;
