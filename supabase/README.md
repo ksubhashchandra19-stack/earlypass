@@ -18,7 +18,7 @@ For additional classes, student accounts, or administrator accounts, a trusted s
 
 ## Weekly timetable and daily goals
 
-The app includes a teacher **Weekly timetable** page for weekday-specific class start times, early-arrival windows, EarlyPass targets, and period schedules. To enable persistent weekly settings on an existing Supabase project, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) once in **Supabase → SQL Editor** after the main schema. The migration keeps existing periods as a shared fallback schedule. Then reload EarlyPass and open **Weekly timetable**.
+The app includes a teacher **Weekly timetable** page for weekday-specific class start times, early-arrival windows, EarlyPass targets, and period schedules. To enable persistent weekly settings on an existing Supabase project, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) once in **Supabase → SQL Editor** after the main schema. The migration copies your existing periods into each weekday so you can adjust days independently while keeping historical attendance intact. Then reload EarlyPass and open **Weekly timetable**.
 
 ## Account model and limitations
 
