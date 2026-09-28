@@ -128,17 +128,17 @@ $$;
 
 create or replace function public.is_school_member(target_school uuid)
 returns boolean language sql stable security definer set search_path = public
-as $
+as $$
   select exists (select 1 from public.profiles p
     where p.user_id = auth.uid() and p.school_id = target_school);
-$;
+$$;
 
 create or replace function public.is_school_admin(target_school uuid)
 returns boolean language sql stable security definer set search_path = public
-as $
+as $$
   select exists (select 1 from public.profiles p
     where p.user_id = auth.uid() and p.school_id = target_school and p.role = 'ADMIN');
-$;
+$$;
 
 create or replace function public.my_student_id()
 returns uuid language sql stable security definer set search_path = public
