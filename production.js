@@ -81,6 +81,7 @@ if(error){showError(errMsg(error));button.disabled=false;button.textContent='Che
 $('#modal-root').innerHTML='';toast('Check-in saved. Thank you for participating!');
 try{await render()}catch(e){showError('Check-in was saved, but the dashboard could not refresh: '+errMsg(e))}
 };return}
+}
 
 document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)action(a.dataset.action,a.dataset.id).catch(err=>showError(errMsg(err)))});
 supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){profile=null;login()}});
