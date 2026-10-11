@@ -31,3 +31,10 @@ Real Google Classroom integration needs a Google Cloud project, Classroom API en
 ## Data and privacy
 
 The initial roster has 25 fictional sample students. Attendance and settings remain in this browser until site data is cleared. Student dashboard selection is a demonstration of the intended personal view, not verified identity. The shared board displays collective counts only and does not list individual attendance.
+
+
+## Atomic check-in migration
+
+Before deploying the matching frontend, apply `supabase/migrations/20261011_atomic_checkin.sql` to your Supabase project using the SQL Editor. The function checks that the signed-in user is an assigned teacher and that the class session, active student, and period belong to the same classroom. It writes arrival and period attendance in one transaction and ignores duplicate retries.
+
+Use fictional test accounts first. Do not publish the frontend update until the migration has been applied successfully.
