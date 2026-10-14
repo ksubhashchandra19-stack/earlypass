@@ -13,9 +13,41 @@ const daySettings=date=>weeklySettings.find(x=>Number(x.weekday)===weekdayOf(dat
 const toast=m=>{const n=document.createElement('div');n.className='toast';n.textContent=m;document.body.append(n);setTimeout(()=>n.remove(),3200)};
 function errMsg(e){return e?.message||'Something went wrong. Please try again.'}
 function showError(m){const n=document.querySelector('#msg');if(n){n.className='notice error';n.textContent=m;n.hidden=false}else toast(m)}
-function login(){app.innerHTML=`<main class="login-wrap"><section class="login-brand"><div class="brand">early<em>pass</em></div><div class="brand-copy"><h1>Arrive early.<br><em>Unlock something special.</em></h1><p>Small steps from each student add up to something great for the whole class.</p></div><div class="brand-foot">A positive start to every school day.</div></section><section class="login-panel"><form class="login-card" id="login"><div class="eyebrow">EARLYPASS · SECURE ACCOUNT</div><h2>Welcome back</h2><p>Sign in with the account your school provided.</p><div id="msg" class="notice" hidden></div><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary wide" type="submit">Sign in</button><div class="login-links"><button class="link" type="button" id="forgot">Forgot password?</button><a class="link" href="./demo.html">Explore demo</a></div></form></section></main>`;
+function login(){app.innerHTML=`<main class="login-wrap"><section class="login-brand"><div class="brand">early<em>pass</em></div><div class="brand-copy"><h1>Arrive early.<br><em>Unlock something special.</em></h1><p>Small steps from each student add up to something great for the whole class.</p></div><div class="brand-foot">A positive start to every school day.</div></section><section class="login-panel"><form class="login-card" id="login"><div class="eyebrow">EARLYPASS · SECURE ACCOUNT</div><h2>Welcome back</h2><p>Sign in with the account your school provided.</p><div id="msg" class="notice" hidden></div><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary wide" type="submit">Sign in</button><div class="login-links"><button class="link" type="button" id="forgot">Forgot password?</button><button class="link" type="button" id="signup">Create account</button><a class="link" href="./demo.html">Explore demo</a></div></form></section></main>`;
 document.querySelector('#login').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;b.textContent='Signing in…';const {error}=await supabase.auth.signInWithPassword({email:document.querySelector('#email').value.trim(),password:document.querySelector('#password').value});b.disabled=false;b.textContent='Sign in';if(error)showError(errMsg(error));else await boot();};
 document.querySelector('#forgot').onclick=async()=>{const email=document.querySelector('#email').value.trim();if(!email){showError('Enter your email above first.');return;}const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)showError(errMsg(error));else{const n=document.querySelector('#msg');n.hidden=false;n.className='notice success';n.textContent='If that account exists, a password reset email is on its way.';}};
+document.querySelector('#signup').onclick=()=>signup();
+}
+function signup(){
+ const card=document.querySelector('.login-card');
+ if(!card){login();return signup()}
+ card.replaceChildren();
+ const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n};
+ const eyebrow=el('div','eyebrow','EARLYPASS · SCHOOL ACCOUNT');
+ const heading=el('h2','','Create your account');
+ const intro=el('p','','Request access to your school’s EarlyPass workspace.');
+ const msg=el('div','notice','');msg.id='msg';msg.hidden=true;
+ const makeField=(id,labelText,type,required=true)=>{const wrap=el('div','field',''),label=el('label','',labelText),input=document.createElement('input');label.htmlFor=id;input.id=id;input.type=type;input.required=required;wrap.append(label,input);return{wrap,input}};
+ const name=makeField('signup-name','Full name','text');
+ const email=makeField('signup-email','School email','email');
+ const roleWrap=el('div','field',''),roleLabel=el('label','','Account type requested'),role=document.createElement('select');role.id='signup-role';roleLabel.htmlFor=role.id;
+ [['STUDENT','Student'],['TEACHER','Teacher']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;role.append(option)});roleWrap.append(roleLabel,role);
+ const password=makeField('signup-password','Password','password'),confirm=makeField('signup-confirm','Confirm password','password');
+ password.input.minLength=8;confirm.input.minLength=8;
+ const note=el('div','notice','Your requested account type does not grant permissions. A school administrator must approve your account and link it to a class before you can view school information.');
+ const submit=el('button','primary wide','Create account');submit.type='submit';
+ const links=el('div','login-links',''),back=el('button','link','Already have an account? Sign in');back.type='button';links.append(back);
+ card.append(eyebrow,heading,intro,msg,name.wrap,email.wrap,roleWrap,password.wrap,confirm.wrap,note,submit,links);
+ back.onclick=()=>{history.replaceState(null,'',location.pathname+location.search+'#login');login()};
+ card.onsubmit=async e=>{
+  e.preventDefault();if(password.input.value!==confirm.input.value){showError('The passwords do not match.');confirm.input.focus();return}
+  submit.disabled=true;submit.textContent='Creating account…';
+  const {data,error}=await supabase.auth.signUp({email:email.input.value.trim(),password:password.input.value,options:{data:{display_name:name.input.value.trim(),requested_role:role.value}}});
+  submit.disabled=false;submit.textContent='Create account';
+  if(error){showError(errMsg(error));return}
+  if(data?.session)await supabase.auth.signOut();
+  const notice=document.querySelector('#msg');notice.hidden=false;notice.className='notice success';notice.textContent='Account request received. Check your email if confirmation is enabled, then contact your school administrator to approve your account and assign your class.';
+ };
 }
 function shell(){const nav=profile.role==='STUDENT'?[['student','My dashboard'],['history','My attendance'],['arrivals','My early arrivals'],['board','Class progress']]:[['dashboard','Dashboard'],['students','Students'],['attendance','Attendance'],['periods','Periods'],['timetable','Weekly timetable'],['earlypass','EarlyPass'],['board','Classroom board'],['settings','Settings']];
 app.innerHTML=`<div class="layout"><aside class="side"><div class="side-head"><div class="brand">early<em>pass</em></div><button class="close-menu secondary" id="close-menu" type="button" aria-label="Close dashboard menu">✕</button></div><div class="school"><b>${esc(classroom.class_name)}${esc(classroom.section)}</b><small>${esc(profile.role)} · ${esc(profile.display_name)}</small></div><nav class="nav">${nav.map(([id,label])=>`<button data-page="${id}" class="${page===id?'active':''}">${label}</button>`).join('')}</nav><div class="side-bottom"><div class="account"><span class="avatar">${esc((profile.display_name||'?').slice(0,1).toUpperCase())}</span><span><b>${esc(profile.display_name)}</b><small>${esc(profile.role)}</small></span><button id="logout" class="logout">Sign out</button></div></div></aside><main class="main"><header class="top"><button class="mobile-menu secondary" id="menu">☰</button><span>${esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))}</span><span class="online">● Secure account</span></header><section class="content" id="content"></section></main></div><div id="modal-root"></div>`;
@@ -66,4 +98,5 @@ if(a==='board-checkin'){const ps=periodsForDay(weekdayOf(today()));const m=modal
 }
 document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)action(a.dataset.action,a.dataset.id).catch(err=>showError(errMsg(err)))});
 supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){profile=null;login()}});
-if(cfg?.supabaseUrl&&cfg?.supabasePublishableKey)boot().catch(e=>{login();showError(errMsg(e))});else login();
+if(cfg?.supabaseUrl&&cfg?.supabasePublishableKey)boot().catch(e=>{login();showError(errMsg(e))});else location.hash==='#signup'?signup():login();
+window.addEventListener('hashchange',()=>{if(!profile)location.hash==='#signup'?signup():login()});
