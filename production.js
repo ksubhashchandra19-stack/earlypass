@@ -33,10 +33,10 @@ function signup(){
  const name=makeField('signup-name','Full name','text');
  const email=makeField('signup-email','School email','email');
  const roleWrap=el('div','field',''),roleLabel=el('label','','Account type requested'),role=document.createElement('select');role.id='signup-role';roleLabel.htmlFor=role.id;
- [['STUDENT','Student'],['TEACHER','Teacher']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;role.append(option)});roleWrap.append(roleLabel,role);
+ [['STUDENT','Student'],['TEACHER','Teacher'],['ADMIN','Administrator (approval required)']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;role.append(option)});roleWrap.append(roleLabel,role);
  const password=makeField('signup-password','Password','password'),confirm=makeField('signup-confirm','Confirm password','password');
  password.input.minLength=8;confirm.input.minLength=8;
- const note=el('div','notice','Your requested account type does not grant permissions. A school administrator must approve your account and link it to a class before you can view school information.');
+ const note=el('div','notice','Your requested account type does not grant permissions. A school administrator must approve your role and assign your school or class before you can access protected information.');
  const submit=el('button','primary wide','Create account');submit.type='submit';
  const links=el('div','login-links',''),back=el('button','link','Already have an account? Sign in');back.type='button';links.append(back);
  card.append(eyebrow,heading,intro,msg,name.wrap,email.wrap,roleWrap,password.wrap,confirm.wrap,note,submit,links);
