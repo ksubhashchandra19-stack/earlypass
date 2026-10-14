@@ -17,8 +17,10 @@ function login(){app.innerHTML=`<main class="login-wrap"><section class="login-b
 document.querySelector('#login').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;b.textContent='Signing in…';const {error}=await supabase.auth.signInWithPassword({email:document.querySelector('#email').value.trim(),password:document.querySelector('#password').value});b.disabled=false;b.textContent='Sign in';if(error)showError(errMsg(error));else await boot();};
 document.querySelector('#forgot').onclick=async()=>{const email=document.querySelector('#email').value.trim();if(!email){showError('Enter your email above first.');return;}const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)showError(errMsg(error));else{const n=document.querySelector('#msg');n.hidden=false;n.className='notice success';n.textContent='If that account exists, a password reset email is on its way.';}};
 document.querySelector('#signup').onclick=()=>signup();
+if(location.hash==='#signup')signup();
 }
 function signup(){
+ if(location.hash!=='#signup')history.replaceState(null,'',location.pathname+location.search+'#signup');
  const card=document.querySelector('.login-card');
  if(!card){login();return signup()}
  card.replaceChildren();
