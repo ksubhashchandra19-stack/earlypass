@@ -1,5 +1,5 @@
 -- EarlyPass class-first signup and daily goal support.
--- Run once after schema.sql (and the weekly timetable migration if already used).
+-- Run once after schema.sql.
 create extension if not exists pgcrypto;
 
 alter table public.earlypass_rewards
@@ -115,26 +115,8 @@ begin
     raise exception 'We could not find that class code. Check it with your teacher and try again.';
   end if;
 
-  select coalesce(max(case when roll_number ~ '^[0-9]+
-
-  v_student_code := 'EP-' ||
-    left(regexp_replace(upper(v_class.class_name || v_class.section), '[^A-Z0-9]', '', 'g'), 10) ||
-    '-' || lpad(v_roll::text, 3, '0');
-
-  insert into public.students(school_id, classroom_id, name, roll_number, student_code, email)
-    values (v_class.school_id, v_class.id, v_name, lpad(v_roll::text, 2, '0'), v_student_code, v_email)
-    returning id into v_student_id;
-
-  insert into public.profiles(user_id, school_id, role, display_name, student_id)
-    values (v_uid, v_class.school_id, 'STUDENT', v_name, v_student_id);
-
-  return jsonb_build_object('ok', true, 'role', 'STUDENT', 'classroom_id', v_class.id, 'student_id', v_student_id);
-end;
-$$;
-
-revoke all on function public.complete_class_signup() from public;
-grant execute on function public.complete_class_signup() to authenticated;
- then roll_number::integer end), 0) + 1 into v_roll
+  select coalesce(max(case when roll_number ~ '^[0-9]+$' then roll_number::integer end), 0) + 1
+    into v_roll
     from public.students
     where classroom_id = v_class.id;
 
@@ -155,8 +137,6 @@ $$;
 
 revoke all on function public.complete_class_signup() from public;
 grant execute on function public.complete_class_signup() to authenticated;
-
-
 
 create or replace function public.set_class_join_code(p_classroom_id uuid, p_join_code text)
 returns void
