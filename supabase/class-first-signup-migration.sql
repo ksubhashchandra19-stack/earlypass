@@ -6,6 +6,10 @@ alter table public.earlypass_rewards
   add column if not exists manual_target boolean not null default false;
 alter table public.earlypass_rewards
   add column if not exists follow_up text not null default 'A brief reflection and a fresh start tomorrow.';
+alter table public.earlypass_rewards
+  add column if not exists checkin_before_minutes integer not null default 3 check (checkin_before_minutes between 0 and 60);
+alter table public.earlypass_rewards
+  add column if not exists checkin_after_minutes integer not null default 3 check (checkin_after_minutes between 0 and 60);
 
 create or replace function public.complete_class_signup()
 returns jsonb
