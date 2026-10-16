@@ -11,7 +11,7 @@ create or replace function public.complete_class_signup()
 returns jsonb
 language plpgsql
 security definer
-set search_path = public, auth, extensions
+set search_path = pg_catalog, public, auth, extensions
 as $$
 declare
   v_uid uuid := auth.uid();
@@ -142,7 +142,7 @@ create or replace function public.set_class_join_code(p_classroom_id uuid, p_joi
 returns void
 language plpgsql
 security definer
-set search_path = public, auth, extensions
+set search_path = pg_catalog, public, auth, extensions
 as $$
 declare
   v_uid uuid := auth.uid();
