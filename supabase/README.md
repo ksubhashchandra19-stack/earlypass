@@ -1,43 +1,38 @@
-# EarlyPass account app and Supabase setup
+# EarlyPass class account setup
 
-The published root app now uses Supabase Auth and the database for teacher/student views. The local-only walkthrough is preserved at [demo.html](../demo.html). Demo data is not shared with authenticated accounts.
+The published app is a class-focused product. It has no school-administrator approval step and no administrator signup option.
 
-## Database setup
+## One-time database setup
 
-You said you ran [schema.sql](./schema.sql). That creates the tables and Row Level Security policies. It does not create user accounts or assign roles.
+The existing database should have **schema.sql** applied. Run [class-first-signup-migration.sql](./class-first-signup-migration.sql) once in **Supabase → SQL Editor** after the schema. It adds the secure account-setup function and daily goal fields needed by the published app. You do not need paid Google Cloud or a paid database for this flow.
 
-## Add the first teacher and class
+After the migration:
 
-1. In Supabase, open **Authentication → Users** and invite or create the teacher using the email they will use to sign in.
-2. Copy the exact email address. In **SQL Editor → New query**, open [first-teacher-setup.sql](./first-teacher-setup.sql), replace `TEACHER_EMAIL`, `SCHOOL_NAME`, and `TEACHER_NAME`, then run it once.
-3. The setup script creates a starter Class 8A schedule. Add real students from the authenticated app after signing in.
-4. Set **Authentication → URL Configuration → Site URL** to `https://ksubhashchandra19-stack.github.io/earlypass/`. Add that URL and the exact `/earlypass/index.html` URL to the allowed redirect URLs for password reset.
-5. Sign in at [EarlyPass](https://ksubhashchandra19-stack.github.io/earlypass/index.html). Use the invited teacher account and its password.
+1. Open EarlyPass and choose **Create account**.
+2. Choose **Teacher / classroom** to create a class and share a join code, or **Student** to join with the code from the teacher.
+3. Confirm email if Supabase has email confirmation enabled, then sign in. There is no administrator approval.
+4. A teacher from an older signup can sign in and complete the one-time setup form. Existing teachers can set or change their student join code in **Settings**.
 
-For additional classes, student accounts, or administrator accounts, a trusted school administrator must create their Auth user, matching profile row, and class assignment. Public self-signup is not used to choose roles. Students can read only the student record linked to their profile; they cannot mark or correct attendance.
+Supabase email confirmation may still be enabled. If it is, signup confirmation messages require working email delivery/SMTP. This is separate from classroom approval.
 
-## Weekly timetable and daily goals
+## Attendance, daily goals, and board mode
 
-The app includes a teacher **Weekly timetable** page for weekday-specific class start times, early-arrival windows, EarlyPass targets, and period schedules. To enable persistent weekly settings on an existing Supabase project, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) once in **Supabase → SQL Editor** after the main schema. The migration copies your existing periods into each weekday so you can adjust days independently while keeping historical attendance intact. Then reload EarlyPass and open **Weekly timetable**.
+Teachers mark attendance for every period in **Attendance**. The default daily EarlyPass target follows the number of students marked Present or Late in Period 1; before attendance has been marked, it falls back to the active class roster. The teacher can override the minimum for that day. Each new day gets its own target and a rotating class activity.
 
-## Real Google Classroom connection
+From the teacher account, open **Classroom board** and choose **Board display** for a large full-screen view. **Record arrivals** allows the teacher to select multiple students at once. Only arrivals before the configured early cutoff increase the EarlyPass count.
 
-The teacher Settings page supports a real Google OAuth connection and Classroom API course/roster import. It does not show a connected state unless Google grants an access token for the current session. To configure it:
+If the minimum is missed after class start, the teacher can open a private follow-up review. It lists only students marked Present or Late in Period 1 who did not check in early; absent and excused students are excluded. The review is private to the teacher and does not put individual records on the board.
 
-1. In Google Cloud Console, create or select a project and enable the **Google Classroom API**.
-2. Configure the OAuth consent screen and add the teacher as a test user while the consent screen is in testing.
-3. Create an OAuth **Web application** client. Add `https://ksubhashchandra19-stack.github.io` as an authorized JavaScript origin.
-4. Run the latest [weekly-timetable-migration.sql](./weekly-timetable-migration.sql) in Supabase if it has not been run again since the Google roster field was added.
-5. In EarlyPass **Settings → Google Classroom**, save the Web Client ID, connect, choose a course, preview the roster, and confirm sync.
+Student accounts have a separate, read-only dashboard with their attendance and early-arrival streak. Students cannot edit attendance or see another student's private records.
 
-Only the OAuth client ID is stored in the browser; Google access tokens remain in memory for that session. Roster sync matches existing students by Google student ID or email and assigns EarlyPass IDs and roll numbers to new records. Demo data does not claim to be a live Google connection.
+## Weekly timetable and Google Classroom
 
-## Account model and limitations
+The teacher **Weekly timetable** page supports day-specific goals and period schedules. If the timetable migration is not already installed, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql).
 
-The browser uses the project's publishable key. The key is intentionally public; Row Level Security is the protection boundary. Never put a service-role or secret key in a static website.
+The teacher Settings page can connect a real Google Classroom OAuth Web Client ID and preview/sync a roster when Google OAuth and Classroom API are configured. Without those credentials, the app must not claim a real Google connection. Google Classroom remains optional and does not replace EarlyPass.
 
-The shared board can be opened from an authorized school account. A teacher uses the shared display to record a student's check-in for a period. Student views are read-only. The current board session uses teacher sign-in; classroom PIN-only guest access is not enabled yet.
+## Legacy manual setup
 
-Google Classroom remains a clearly labelled mock preview in the demo. Real OAuth/API sync requires a server-side token exchange and configured Google Cloud OAuth credentials. This static app does not claim a real Google connection.
+[First teacher setup](./first-teacher-setup.sql) is a legacy manual provisioning script for an existing Supabase Auth user. New classes should use the free in-app teacher signup. If you already used the legacy script, open teacher Settings and set a class join code before students try to join.
 
-The prototype does not include a dedicated backend service for rate-limited PIN sessions or Google OAuth. Do not use real student data until the school validates the account provisioning, access rules, privacy requirements, and actual deployed flow with separate student and teacher accounts.
+The database still keeps school/class ids internally for data isolation and Row Level Security, but teachers manage their own class. Do not expose a service-role key in the browser.
