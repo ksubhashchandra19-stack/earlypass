@@ -1,4 +1,8 @@
--- Bootstrap one teacher and one classroom for the EarlyPass prototype.
+-- LEGACY MANUAL PROVISIONING ONLY.
+-- New classes should use the free Teacher / classroom signup in the app and run
+-- class-first-signup-migration.sql once. This file is only for an existing Auth
+-- user/class that is being manually migrated. It does not create a student join code;
+-- set one from the teacher account Settings page after running this script.
 -- Before running, create/invite the teacher in Supabase Authentication → Users.
 -- Replace the three ALL-CAPS values below. Run only once for this school/class.
 do $$
