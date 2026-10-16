@@ -1,33 +1,22 @@
 # EarlyPass
 
-A responsive classroom attendance and early-arrival prototype. The shared classroom board is the primary experience; teacher and student views are separate previews.
+A class-focused attendance app built around a shared classroom board, with separate teacher and student accounts.
 
-## Run locally
+- Teacher accounts create a class, choose its join code, manage students and periods, mark attendance, and open the board in full-screen display mode.
+- Student accounts use that code to join and see only their own attendance and early-arrival streaks.
+- Account creation is free and does not require school-administrator approval. Supabase email confirmation may still be enabled for sign-in.
+- The board shows collective progress and the class activity, never individual attendance or rankings.
 
-Open `index.html` in a browser, or serve this folder with any static web server. The demo uses local browser storage and does not need a build step, account, or paid service. For offline support, open the app once from an HTTP(S) origin so the service worker can cache its assets.
+## Publish
 
-## Demo credentials and flows
+The project is a static web app and is published with GitHub Pages. It has no build command. Open [EarlyPass](https://ksubhashchandra19-stack.github.io/earlypass/).
 
-- Teacher workspace: default view. Select the account avatar to switch experiences.
-- Student account: choose a sample student. This view is read-only and shows only that selected student's records.
-- Classroom board: open **Classroom board → Launch board view** and enter the code shown in the teacher view (`8A-2026` initially).
-- Demo controls: bottom-right panel can simulate arrivals, adjust the demo clock, advance periods, trigger the shared reward, and start a new day.
-- Google Classroom: **DEMO / MOCK GOOGLE CLASSROOM** shows a course and roster import preview. It does not connect to Google.
+## Supabase setup
 
-## Publish with GitHub Pages
+The production account app uses Supabase Auth and the database. For a fresh project, run **supabase/schema.sql** and then **supabase/class-first-signup-migration.sql** in Supabase SQL Editor. Existing installations should run the class-first migration once after the schema. The weekly timetable migration is optional unless weekly timetable settings are needed.
 
-1. Create a GitHub repository and put the contents of this folder at the repository root (or configure Pages to use the `outputs/earlypass` folder through an appropriate publishing workflow).
-2. In repository **Settings → Pages**, choose **Deploy from a branch**, then select the `main` branch and `/ (root)` directory.
-3. Wait for the Pages deployment and open its public URL. HTTPS is needed for service worker/offline support.
+The class-first migration adds self-service teacher class creation and student joining by class code. Existing signed-in accounts without a class profile can complete the one-time setup form after the migration is applied. Teachers can set or change their class join code in Settings.
 
-The same static files can be deployed to Cloudflare Pages, Netlify, or Vercel without a build command; use this directory as the publish directory.
+Never put a Supabase service-role key in the static site. The browser uses only the publishable key configured in **supabase/config.js**. Email confirmation and email delivery depend on the Supabase Auth email settings.
 
-## Prototype boundaries and production work
-
-The app is intentionally a static prototype. Accounts and roles are demo selectors, not authentication. Local storage is per browser/device and is not a shared classroom database. Classroom codes, attendance, and role restrictions are not secure against a user who can inspect or edit browser data. Use a trusted backend with authenticated sessions and server-side authorization before using real student records.
-
-Real Google Classroom integration needs a Google Cloud project, Classroom API enabled, OAuth consent configuration, approved scopes, OAuth client credentials, and a secure server-side authorization-code/token exchange. Do not put a client secret or long-lived access token in static files. The demo flow is clearly marked and never claims to be connected to Google.
-
-## Data and privacy
-
-The initial roster has 25 fictional sample students. Attendance and settings remain in this browser until site data is cleared. Student dashboard selection is a demonstration of the intended personal view, not verified identity. The shared board displays collective counts only and does not list individual attendance.
+See [Supabase setup notes](supabase/README.md) for account setup, daily goals, classroom-board check-ins, privacy, and optional Google Classroom integration. The separate [demo walkthrough](demo.html) uses local browser data and is not the production account app.
