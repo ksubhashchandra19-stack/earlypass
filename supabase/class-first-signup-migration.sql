@@ -2,6 +2,14 @@
 -- Run after schema.sql; it is safe to re-run to pick up additive updates.
 create extension if not exists pgcrypto;
 
+-- Keep check-ins separate for each period while retaining older daily records.
+alter table public.arrivals
+  add column if not exists period_id uuid references public.periods(id) on delete set null;
+alter table public.arrivals
+  drop constraint if exists arrivals_class_day_id_student_id_key;
+create unique index if not exists arrivals_class_day_student_period_key
+  on public.arrivals(class_day_id, student_id, period_id);
+
 alter table public.earlypass_rewards
   add column if not exists manual_target boolean not null default false;
 alter table public.earlypass_rewards
