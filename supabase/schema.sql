@@ -111,10 +111,11 @@ create table public.arrivals (
   id uuid primary key default gen_random_uuid(),
   class_day_id uuid not null references public.class_days(id) on delete cascade,
   student_id uuid not null references public.students(id) on delete cascade,
+  period_id uuid references public.periods(id) on delete set null,
   arrived_at timestamptz not null default now(),
   status public.arrival_status not null,
   recorded_by uuid not null references public.profiles(user_id),
-  unique (class_day_id, student_id)
+  unique (class_day_id, student_id, period_id)
 );
 
 create table public.earlypass_rewards (
