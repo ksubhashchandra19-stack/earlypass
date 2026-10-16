@@ -10,7 +10,7 @@ const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','S
 const weekdayOf=date=>((new Date((date||today())+'T00:00:00').getDay()+6)%7)+1;
 const periodsForDay=day=>{const exact=periods.filter(p=>Number(p.weekday||0)===Number(day));return (exact.length?exact:periods.filter(p=>Number(p.weekday||0)===0)).sort((a,b)=>a.position-b.position)};
 const rewardChoices=['Mystery Puzzle','5-Minute Class Game','Team Challenge','Music Choice','Teacher Mystery Challenge','Student Choice Activity'];
-const rewardForDate=date=>rewardChoices[(Number(String(date).replaceAll('-',''))||0)%rewardChoices.length];
+const rewardForDate=date=>rewardChoices[Math.abs(Math.floor(new Date(String(date)+'T12:00:00Z').getTime()/86400000))%rewardChoices.length];
 
 const daySettings=date=>weeklySettings.find(x=>Number(x.weekday)===weekdayOf(date))||{earlypass_target:classroom?.earlypass_target||25,class_start:classroom?.class_start||'08:30',early_window_minutes:classroom?.early_window_minutes||15};
 const toast=m=>{const n=document.createElement('div');n.className='toast';n.textContent=m;document.body.append(n);setTimeout(()=>n.remove(),3200)};
