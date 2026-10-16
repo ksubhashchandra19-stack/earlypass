@@ -1,5 +1,5 @@
 -- EarlyPass class-first signup and daily goal support.
--- Run once after schema.sql.
+-- Run after schema.sql; it is safe to re-run to pick up additive updates.
 create extension if not exists pgcrypto;
 
 alter table public.earlypass_rewards
