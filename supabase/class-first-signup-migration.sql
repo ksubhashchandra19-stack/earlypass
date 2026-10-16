@@ -48,7 +48,7 @@ begin
 
   v_name := nullif(trim(v_meta->>'display_name'), '');
   v_role := upper(coalesce(v_meta->>'requested_role', ''));
-  v_join_code := upper(regexp_replace(trim(coalesce(v_meta->>'class_join_code', '')), '\\s+', '', 'g'));
+  v_join_code := upper(regexp_replace(trim(coalesce(v_meta->>'class_join_code', '')), '[[:space:]]+', '', 'g'));
 
   if v_name is null then
     raise exception 'Enter your name to finish account setup.';
@@ -155,3 +155,32 @@ $$;
 
 revoke all on function public.complete_class_signup() from public;
 grant execute on function public.complete_class_signup() to authenticated;
+
+
+
+create or replace function public.set_class_join_code(p_classroom_id uuid, p_join_code text)
+returns void
+language plpgsql
+security definer
+set search_path = public, auth, extensions
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_code text := upper(regexp_replace(trim(coalesce(p_join_code, '')), '[[:space:]]+', '', 'g'));
+  v_hash text;
+begin
+  if v_uid is null then raise exception 'Please sign in first.'; end if;
+  if length(v_code) < 6 then raise exception 'Use a join code with at least 6 characters.'; end if;
+  if not exists (select 1 from public.classroom_teachers where classroom_id = p_classroom_id and user_id = v_uid) then
+    raise exception 'Only this class teacher can change its join code.';
+  end if;
+  v_hash := encode(digest(v_code, 'sha256'), 'hex');
+  if exists (select 1 from public.classrooms where access_code_hash = v_hash and id <> p_classroom_id) then
+    raise exception 'That join code is already used by another class. Choose a different code.';
+  end if;
+  update public.classrooms set access_code_hash = v_hash where id = p_classroom_id;
+end;
+$$;
+
+revoke all on function public.set_class_join_code(uuid, text) from public;
+grant execute on function public.set_class_join_code(uuid, text) to authenticated;
