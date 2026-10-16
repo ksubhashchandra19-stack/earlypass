@@ -3,7 +3,8 @@
 A class-focused attendance app built around a shared classroom board, with separate teacher and student accounts.
 
 - Teacher accounts create a class, choose its join code, manage students and periods, mark attendance, and open the board in full-screen display mode.
-- Student accounts use that code to join and see only their own attendance and early-arrival streaks.
+- Student accounts use that code to join and see only their own daily attendance and early-arrival streaks. Teachers take one morning roll call per day before Period 1.
+- The shared board shows a live EarlyPass timer around Period 1. The default is three minutes before to three minutes after the period starts; teachers can edit the window and daily goal. Only arrivals recorded inside the window count toward the reward.
 - Account creation is free and does not require school-administrator approval. Supabase email confirmation may still be enabled for sign-in.
 - The board shows collective progress and the class activity, never individual attendance or rankings.
 
