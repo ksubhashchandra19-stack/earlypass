@@ -251,6 +251,6 @@ grant select, insert, update, delete on public.classrooms, public.classroom_teac
 grant select on public.profiles to authenticated;
 grant execute on function public.is_class_teacher(uuid), public.is_school_member(uuid), public.is_school_admin(uuid), public.my_student_id() to authenticated;
 
--- Provision the first school, classroom, teacher profile, and classroom_teachers
--- assignment using the SQL Editor / trusted admin tooling. Never let public signup
--- choose its own role. Do not expose the service role key in a browser.
+-- Apply class-first-signup-migration.sql after this schema to enable free
+-- Teacher class creation and Student joining by class code. The app offers no
+-- school-administrator signup or approval flow. Never expose the service-role key.
