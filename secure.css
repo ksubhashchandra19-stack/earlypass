@@ -20,3 +20,5 @@ body.board-fullscreen .page-title{display:none}
 body.board-fullscreen .board-wrap{min-height:100vh;padding:2vw}
 body.board-fullscreen .board{width:100%;height:96vh;min-height:0;border-radius:22px}
 @media(max-width:560px){.checkin-roster{grid-template-columns:1fr}}
+
+.timer-label{font-size:clamp(18px,2.2vw,28px);font-weight:800;color:#13865e;margin:18px 0}.board .timer-label{color:#b9f1d1;font-size:clamp(20px,2.3vw,30px);margin:18px 0}.board-fullscreen .board .timer-label{font-size:clamp(26px,2.8vw,38px)}
