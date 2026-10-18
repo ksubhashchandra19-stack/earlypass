@@ -12,5 +12,5 @@
 (()=>{const show=message=>{const box=document.getElementById('earlypass-startup');if(!box)return;const text=document.getElementById('earlypass-startup-message');if(text)text.textContent='EarlyPass could not start: '+String(message||'a script failed to load.');const button=document.getElementById('earlypass-reload');if(button)button.hidden=false};window.addEventListener('error',event=>show(event.message||'a script failed to load.'),true);window.addEventListener('unhandledrejection',event=>show(event.reason?.message||event.reason||'a startup request failed.'));setTimeout(()=>{if(document.getElementById('earlypass-startup'))show('the app is taking longer than expected. Check your connection, then reload.')},12000);document.addEventListener('click',event=>{if(event.target.id==='earlypass-reload')location.reload()})})();
 </script>
 <script src="./supabase/config.js"></script>
-<script type="module" src="./production.js?v=26"></script>
+<script type="module" src="./production.js?v=27"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});</script></body></html>
