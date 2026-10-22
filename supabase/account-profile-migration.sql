@@ -60,6 +60,20 @@ begin
 end;
 $$;
 
+-- Let assigned teachers see which of their roster students have a linked login,
+-- without exposing unrelated student profiles.
+drop policy if exists "teachers read linked student profiles" on public.profiles;
+create policy "teachers read linked student profiles"
+on public.profiles for select
+using (
+  role = 'STUDENT'
+  and exists (
+    select 1 from public.students s
+    where s.id = public.profiles.student_id
+      and public.is_class_teacher(s.classroom_id)
+  )
+);
+
 revoke all on function public.update_my_account_details(text) from public;
 revoke all on function public.sync_my_student_email() from public;
 grant execute on function public.update_my_account_details(text) to authenticated;
