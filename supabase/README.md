@@ -15,6 +15,10 @@ After the migration:
 
 Supabase email confirmation may still be enabled. If it is, signup confirmation messages require working email delivery/SMTP. This is separate from classroom approval.
 
+## Self-service account details
+
+Students and teachers can open **My account** to change their own name, sign-in email, and password at any time. Email changes may require confirmation. Student ID, roll number, and class membership remain teacher-managed. Run [account-profile-migration.sql](./account-profile-migration.sql) once in **Supabase → SQL Editor** to enable safe name updates and keep a student roster email in sync after email confirmation.
+
 ## Attendance, daily goals, and board mode
 
 Teachers mark attendance for every period in **Attendance**. The default daily EarlyPass target follows the number of students marked Present or Late in Period 1; before attendance has been marked, it falls back to the active class roster. The teacher can override the minimum for that day. Each new day gets its own target and a rotating class activity.
