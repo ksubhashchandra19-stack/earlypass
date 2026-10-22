@@ -15,6 +15,10 @@ After the migration:
 
 Supabase email confirmation may still be enabled. If it is, signup confirmation messages require working email delivery/SMTP. This is separate from classroom approval.
 
+## Student self-attendance and period check-ins
+
+Students can mark themselves Present once for the day, before Period 1 starts, and check in for scheduled periods from **My dashboard**. They can only create their own Present/check-in records; an existing teacher mark cannot be overwritten. Check-ins outside the configured period timer are saved but do not count toward the shared reward. Run [student-self-checkin-migration.sql](./student-self-checkin-migration.sql) once in the Supabase SQL Editor.
+
 ## Self-service account details
 
 Students and teachers can open **My account** to change their own name, sign-in email, and password at any time. Email changes may require confirmation. Student ID, roll number, and class membership remain teacher-managed. Run [account-profile-migration.sql](./account-profile-migration.sql) once in **Supabase → SQL Editor** to enable safe name updates and keep a student roster email in sync after email confirmation.
