@@ -34,9 +34,16 @@ Student logins use the initial password chosen in Supabase Edge Function Secrets
 ### One-time Supabase function setup
 
 1. In the Supabase Dashboard for project `wnhuzltyhfnmxanawown`, open **Edge Functions → Secrets** and add `STUDENT_DEFAULT_PASSWORD` with the requested first-password value. Do not commit it to GitHub.
-2. From a local copy of this repository, sign in and link the Supabase CLI to project `wnhuzltyhfnmxanawown`.
-3. Deploy `provision-student` from [the function source](./functions/provision-student/index.ts). The repository includes `supabase/config.toml` with JWT verification enabled.
-4. The GitHub Pages frontend and this Edge Function deploy separately. Student logins will work after both the Pages update and the function deployment.
+2. Install the Supabase CLI and open a terminal in a local copy of this repository. Run:
+
+   ```text
+   npx supabase login
+   npx supabase link --project-ref wnhuzltyhfnmxanawown
+   npx supabase functions deploy provision-student --project-ref wnhuzltyhfnmxanawown
+   ```
+
+   The function source is [here](./functions/provision-student/index.ts), and `supabase/config.toml` enables JWT verification.
+3. GitHub Pages and the Supabase Edge Function deploy separately. Student logins work after both deployments and after the private secret is saved.
 
 The Edge Function checks that the caller is the assigned teacher, creates an email-confirmed Student Auth account, and links its profile to the class roster record. If the email already belongs to another unlinked account, EarlyPass leaves it unchanged and reports the conflict.
 
