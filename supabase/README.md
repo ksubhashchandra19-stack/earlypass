@@ -25,6 +25,21 @@ If the minimum is missed after class start, the teacher can open a private follo
 
 Student accounts have a separate, read-only dashboard with their attendance and early-arrival streak. Students cannot edit attendance or see another student's private records.
 
+## Student login accounts for teacher-added and Google Classroom students
+
+Teacher-added students need an email address. When the teacher adds a student or syncs a Google Classroom roster, EarlyPass can create a separate Student login using the student's email as the username. Students who joined the class themselves keep their existing account and password; provisioning checks for an already-linked student account and never resets it.
+
+Student logins use the initial password chosen in Supabase Edge Function Secrets under `STUDENT_DEFAULT_PASSWORD`. Keep that value private. The app requires provisioned students to change it at their first sign-in. The service-role key is never placed in the browser or this repository.
+
+### One-time Supabase function setup
+
+1. In the Supabase Dashboard for project `wnhuzltyhfnmxanawown`, open **Edge Functions → Secrets** and add `STUDENT_DEFAULT_PASSWORD` with the requested first-password value. Do not commit it to GitHub.
+2. From a local copy of this repository, sign in and link the Supabase CLI to project `wnhuzltyhfnmxanawown`.
+3. Deploy `provision-student` from [the function source](./functions/provision-student/index.ts). The repository includes `supabase/config.toml` with JWT verification enabled.
+4. The GitHub Pages frontend and this Edge Function deploy separately. Student logins will work after both the Pages update and the function deployment.
+
+The Edge Function checks that the caller is the assigned teacher, creates an email-confirmed Student Auth account, and links its profile to the class roster record. If the email already belongs to another unlinked account, EarlyPass leaves it unchanged and reports the conflict.
+
 ## Weekly timetable and Google Classroom
 
 The teacher **Weekly timetable** page supports day-specific goals and period schedules. If the timetable migration is not already installed, run [weekly-timetable-migration.sql](./weekly-timetable-migration.sql).
